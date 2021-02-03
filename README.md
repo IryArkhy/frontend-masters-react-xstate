@@ -22,3 +22,7 @@ To run this workshop:
 Exercises are separated by directory in `src/##`. Each directory will contain a `README.md` describing the goal of the exercise, as well as tips and comments in the `Timer.js` and `timerMachine.js` files.
 
 Your objective is to accomplish the goals in `README.md`. If you get stuck, refer to the `Timer.final.js` and/or `timerMachine.final.js` files in each directory.
+
+#SCXML
+[SCXML Docs](https://www.w3.org/TR/scxml/)
+
