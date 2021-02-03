@@ -1,15 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useReducer } from "react";
 import { createMachine, assign, spawn, sendParent } from "xstate";
 import { useMachine, useService } from "@xstate/react";
 
-// ---- 11 ---
-// STATE TYPES
-// Shared States with useService
-
-// how you can share machines between different components?
-// in XState there is one way, interpretinf that machine and basically subscribing to that machin from everywhere. we can do that with useServiceHook and useContext. see the complete app main file and ForeignClock component to see more.
-
-// Hierarchical States
+// ---- 10 ---
+// TRANSITIONS
+// Eventless transitions - transitions that occurs immidiately and do not require event
 
 const incrementCount = assign({
   count: (context) => context.count + 1,
@@ -17,6 +12,36 @@ const incrementCount = assign({
 
 const tooMuchGuard = (context, event) => context.count < 5;
 
+const isMorning = (ctx) => new Date().getHours() < 12;
+const greetMachine = createMachine(
+  {
+    //dynamic initial state
+    initial: "unknown",
+    states: {
+      unknown: {
+        // Transient transitions because it's going somwhere else
+        always: [
+          // Be CARFUL you can get caught in an infinite loop -> stack overflow
+          // if you have a condition but you forget to provide the alternative target in the array
+          {
+            cond: "isMorning",
+            target: "morning",
+          },
+          {
+            target: "day",
+          },
+        ],
+      },
+      morning: {},
+      day: {},
+    },
+  },
+  {
+    guards: {
+      isMorning,
+    },
+  }
+);
 const alarmMachine = createMachine(
   {
     initial: "inactive",
@@ -43,17 +68,7 @@ const alarmMachine = createMachine(
           TOGGLE: "inactive",
         },
       },
-      // Hierarchical state
       active: {
-        initial: "normal",
-        states: {
-          normal: {
-            after: {
-              1000: "looksGood",
-            },
-          },
-          looksGood: {},
-        },
         on: {
           TOGGLE: {
             target: "inactive",
@@ -76,6 +91,7 @@ const alarmMachine = createMachine(
 );
 
 export const ScratchApp = () => {
+  const [greetState] = useMachine(greetMachine);
   const [state, send] = useMachine(alarmMachine);
 
   const status = state.value;
@@ -95,6 +111,7 @@ export const ScratchApp = () => {
 
   return (
     <div className="scratch">
+      <h2> Good {greetState.value === "morning" ? "morning!!" : "day!"}</h2>
       <div className="alarm">
         <div className="alarmTime">
           {new Date().toLocaleTimeString("en-US", {

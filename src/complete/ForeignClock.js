@@ -7,9 +7,14 @@ import mockTimezones from "./timezones.json";
 
 // USING XSTATE with 3-d party libraries
 // YOU comunicate through actions!
+
+// This components subscribes for the service of the stateMachine from parent component. It's done via context. The Parent wraps children with provider and childrens can subscribe to the service.
 export function ForeignClock() {
+  // this hook is for reading from the context
   const localTimeService = useContext(LocalTimeContext);
-  const [localTimeState] = useService(localTimeService);
+  // this hook to subscribe and read from the state machine
+  // it gives you similar tuple to the useMachine hook -> state and send method
+  const [localTimeState, localTimeSend] = useService(localTimeService);
   const [state, send] = useMachine(foreignClockMachine);
 
   const { data } = useQuery("timezones", () => {
