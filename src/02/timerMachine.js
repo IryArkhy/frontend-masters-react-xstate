@@ -1,31 +1,39 @@
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign } from "xstate";
 
 export const timerMachine = createMachine({
-  initial: 'idle',
+  initial: "idle",
   // Add initial context
-  // ...
-
+  context: {
+    duration: 60, //(seconds)
+    elapsed: 0, // (seconds)
+    interval: 0.1, // (seconds - 1/10th of a second)
+  },
   states: {
     idle: {
-      // Reset duration and elapsed on entry
-      // ...
-
+      entry: assign({
+        duration: () => 60,
+        elapsed: () => 0,
+      }),
       on: {
-        TOGGLE: 'running',
+        TOGGLE: "running",
       },
     },
     running: {
       on: {
-        TOGGLE: 'paused',
+        TOGGLE: "paused",
 
         // On ADD_MINUTE, increment context.duration by 60 seconds
-        // ...
+        ADD_MINUTE: {
+          actions: assign({
+            duration: (context, action) => context.duration + 60,
+          }),
+        },
       },
     },
     paused: {
       on: {
-        TOGGLE: 'running',
-        RESET: 'idle',
+        TOGGLE: "running",
+        RESET: "idle",
       },
     },
   },

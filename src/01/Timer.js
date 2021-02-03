@@ -1,30 +1,41 @@
-import * as React from 'react';
-import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as React from "react";
+import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ProgressCircle } from "../ProgressCircle";
+import { useMachine } from "@xstate/react";
+import { timerMachine } from "./timerMachine";
 
-import { ProgressCircle } from '../ProgressCircle';
+// XState real time devTools
+// import inspect, iframe: false to open a separate window
+//import { inspect } from "@xstate/inspect";
+// inspect({
+//   iframe: false,
+// });
 
-// import { useMachine } from '@xstate/react';
-import { timerMachine } from './timerMachine';
+// and settings object into useMachine
+// https://statecharts.io/inspect
+// const [state, send] = useMachine(timerMachine, { devTools: true });
 
 export const Timer = () => {
-  const [state, send] = [{}, () => {}];
+  // https://statecharts.io/inspect
+  const [state, send] = useMachine(timerMachine);
 
   const { duration, elapsed, interval } = {
     duration: 60,
     elapsed: 0,
     interval: 0.1,
   };
+  const { value: status } = state;
 
   return (
     <div
       className="timer"
-      data-state={state.value} // Hint!
+      data-state={status}
       style={{
         // @ts-ignore
-        '--duration': duration,
-        '--elapsed': elapsed,
-        '--interval': interval,
+        "--duration": duration,
+        "--elapsed": elapsed,
+        "--interval": interval,
       }}
     >
       <header>
@@ -32,20 +43,20 @@ export const Timer = () => {
       </header>
       <ProgressCircle />
       <div className="display">
-        <div className="label">{state.value}</div>
+        <div className="label">{status}</div>
         <div
           className="elapsed"
           onClick={() => {
-            // ...
+            send("TOGGLE");
           }}
         >
           {Math.ceil(duration - elapsed)}
         </div>
         <div className="controls">
-          {state === 'paused' && (
+          {status === "paused" && (
             <button
               onClick={() => {
-                // ...
+                send("RESET");
               }}
             >
               Reset
@@ -54,10 +65,10 @@ export const Timer = () => {
         </div>
       </div>
       <div className="actions">
-        {state === 'running' && (
+        {status === "running" && (
           <button
             onClick={() => {
-              // ...
+              send("TOGGLE");
             }}
             title="Pause timer"
           >
@@ -65,10 +76,10 @@ export const Timer = () => {
           </button>
         )}
 
-        {(state === 'paused' || state === 'idle') && (
+        {status !== "running" && (
           <button
             onClick={() => {
-              // ...
+              send("TOGGLE");
             }}
             title="Start timer"
           >
