@@ -26,3 +26,5 @@ Your objective is to accomplish the goals in `README.md`. If you get stuck, refe
 #SCXML
 [SCXML Docs](https://www.w3.org/TR/scxml/)
 
+#Model Based Testing
+- Given / When / Then style of testing
